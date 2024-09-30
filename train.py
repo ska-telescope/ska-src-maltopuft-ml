@@ -20,7 +20,7 @@ import pandas as pd
 from FRBID_code.load_data import load_data, shuffle_all
 
 import matplotlib.pylab as plt
-from keras.utils import np_utils
+from keras.utils import to_categorical
 from time import gmtime, strftime
 from sklearn.model_selection import train_test_split
 
@@ -31,13 +31,6 @@ from FRBID_code.evaluation import model_prediction, save_classified_examples
 from FRBID_code.util import makedirs, ensure_dir
 
 import tensorflow as tf
-from keras.backend.tensorflow_backend import set_session
-
-
-config = tf.ConfigProto()
-#config.gpu_options.allow_growth = True
-config.gpu_options.per_process_gpu_memory_fraction = 0.8
-sess = tf.Session(config=config)
 
 figSize  = (12, 8)
 fontSize = 20
@@ -87,10 +80,10 @@ print("Number of test examples in class 0: {}".format(str(len(np.where(y_test ==
 print("Number of test examples in class 1: {}".format(str(len(np.where(y_test == 1)[0]))))
 
 
-# Transform the vector of class integers into a one-hot encoded matrix using np_utils.to_categorical()
-yTrain1h   = np_utils.to_categorical(y_train, nClasses)
-yTest1h    = np_utils.to_categorical(y_test, nClasses)
-yVal1h    = np_utils.to_categorical(y_val, nClasses)
+# Transform the vector of class integers into a one-hot encoded matrix using to_categorical()
+yTrain1h   = to_categorical(y_train, nClasses)
+yTest1h    = to_categorical(y_test, nClasses)
+yVal1h    = to_categorical(y_val, nClasses)
 print('The training set consists of {}'.format(X_train.shape))
 print('The testing set consists of {}'.format(X_test.shape))
 print('The validation set consists of {}'.format(X_val.shape))

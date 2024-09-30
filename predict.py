@@ -22,7 +22,6 @@ import numpy as np
 import pandas as pd
 from FRBID_code.model import compile_model,model_save 
 import matplotlib.pylab as plt
-from keras.utils import np_utils
 from time import gmtime, strftime
 from FRBID_code.util import makedirs, ensure_dir
 from FRBID_code.prediction_phase import load_candidate, FRB_prediction
@@ -65,8 +64,3 @@ print("The Shape of the test set is {}".format(test.shape))
 
 overall_real_prob,overall_dataframe=FRB_prediction(model_name=model_cnn_name,X_test=test,ID=ID_test,result_dir=result_dir,probability=probability)
 print('Prediction completed and is found at {}'.format(str(result_dir)))
-
-
-
-
-

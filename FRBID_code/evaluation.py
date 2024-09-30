@@ -17,7 +17,7 @@ import tensorflow as tf
 from tensorflow import keras
 from sklearn.preprocessing import LabelEncoder
 from imblearn.metrics import classification_report_imbalanced
-from keras.utils import np_utils
+from keras.utils import to_categorical
 from sklearn.metrics import matthews_corrcoef, classification_report, confusion_matrix,balanced_accuracy_score
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, roc_curve, auc, roc_auc_score
 from keras.models import model_from_json
@@ -62,9 +62,9 @@ def model_prediction(fit_model, odir, model_name, X_test, y_test, classes=["RFI"
     else:
         fit_model = fit_model
     
-    ypred          = np.argmax(fit_model.predict(X_test),axis=1)
-    probability    = fit_model.predict_proba(X_test)
-    accuracy       = accuracy_score(y_test, ypred)
+    probability = fit_model.predict(X_test)
+    ypred = np.argmax(probability,axis=1)
+    accuracy = accuracy_score(y_test, ypred)
     MCC            = matthews_corrcoef(y_test, ypred)
     conf_mat       = confusion_matrix(y_test, ypred)
     balance_accuracy = balanced_accuracy_score(y_test, ypred)
@@ -72,13 +72,13 @@ def model_prediction(fit_model, odir, model_name, X_test, y_test, classes=["RFI"
 
     le             = LabelEncoder()
     labels         = le.fit_transform(y_test)
-    yTest          = np_utils.to_categorical(labels,len(classes))
-    auc            = roc_auc_score(yTest,probability)    
+    yTest          = to_categorical(labels, len(classes))
+    #auc            = roc_auc_score(yTest, probability)
     misclassified  = np.where(y_test != ypred)[0]
     correct_classification = np.where(y_test == ypred)[0]
 
     plot_confusion_matrix(conf_mat, classes_types=classes, ofname=os.path.join(odir, "confusion_matrix.pdf"), normalize=cm_norm,show=show)    
-    plot_roc(fpr, tpr, auc, ofname=os.path.join(odir, "ROC.pdf"),show=show)
+    #plot_roc(fpr, tpr, auc, ofname=os.path.join(odir, "ROC.pdf"),show=show)
      
     name_file = open(os.path.join(odir, "Results.txt"), 'w')
     name_file.write('='*80+'\n')

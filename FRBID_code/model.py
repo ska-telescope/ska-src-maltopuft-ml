@@ -10,12 +10,12 @@ Python implementation for FRBID: Fast Radio Burst Intelligent Distinguisher.
 This code is tested in Python 3 version 3.5.3  
 """
 
-import keras
-from keras.models import Sequential
-from keras.layers import Dropout, Flatten, Convolution2D, MaxPooling2D, Dense, Activation, Conv2D
-from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
-from keras.preprocessing.image import ImageDataGenerator
-
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dropout, Flatten, Convolution2D, MaxPooling2D, Dense, Activation, Conv2D
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
 def get_modelparameters(params,img_shape, lr):
@@ -42,7 +42,7 @@ def get_modelparameters(params,img_shape, lr):
         model.add(Flatten())
         model.add(Dense(2, activation='softmax'))
         model.summary()
-        optimizers = keras.optimizers.Adam(lr=lr)
+        optimizers = keras.optimizers.Adam(learning_rate=lr)
         losses = 'binary_crossentropy'
         model.compile(optimizer=optimizers, loss=losses, metrics=['accuracy'])
         
@@ -62,7 +62,7 @@ def get_modelparameters(params,img_shape, lr):
         model.add(Flatten())
         model.add(Dense(2, activation='softmax'))
         model.summary()
-        optimizers = keras.optimizers.Adam(lr=lr)
+        optimizers = keras.optimizers.Adam(learning_rate=lr)
         losses = 'binary_crossentropy'
         model.compile(optimizer=optimizers, loss=losses, metrics=['accuracy'])
         
@@ -82,7 +82,7 @@ def get_modelparameters(params,img_shape, lr):
         model.add(Flatten())
         model.add(Dense(2, activation='softmax'))
         model.summary()
-        adam_op = keras.optimizers.Adam(lr=lr)
+        adam_op = keras.optimizers.Adam(learning_rate=lr)
         model.compile(optimizer=adam_op, loss='binary_crossentropy', metrics=['accuracy'])
         
         return model
@@ -105,7 +105,7 @@ def get_modelparameters(params,img_shape, lr):
         model.add(Flatten())
         model.add(Dense(2, activation='softmax'))
         model.summary()
-        adam_op = keras.optimizers.Adam(lr=lr)
+        adam_op = keras.optimizers.Adam(learning_rate=lr)
         model.compile(optimizer=adam_op, loss='binary_crossentropy', metrics=['accuracy'])
         
         return model
@@ -130,7 +130,7 @@ def get_modelparameters(params,img_shape, lr):
         model.add(Flatten())
         model.add(Dense(2, activation='softmax'))
         model.summary()
-        adam_op = keras.optimizers.Adam(lr=lr)
+        adam_op = keras.optimizers.Adam(learning_rate=lr)
         model.compile(optimizer=adam_op, loss='binary_crossentropy', metrics=['accuracy'])
         
         return model
@@ -187,8 +187,6 @@ def compile_model(params,img_shape,save_model_dir, X_train, y_train, X_val, yval
     return history, modelCNN
 
 
-
-
 def model_save(model, model_name):
     '''
     Function to save the fully trained model
@@ -202,8 +200,6 @@ def model_save(model, model_name):
     with open('./FRBID_model/'+model_name+".json", "w") as json_file:
         json_file.write(model_json)
     # serialize weights to HDF5
-    model.save_weights('./FRBID_model/'+model_name+".h5")
+    model.save_weights('./FRBID_model/'+model_name+".weights.h5")
     print("Saved model to disk")            
     return model
-
-
