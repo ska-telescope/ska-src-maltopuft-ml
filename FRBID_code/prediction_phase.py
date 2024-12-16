@@ -43,14 +43,20 @@ def load_candidate(data_dir = './data/test_set/',n_images = 'dm_fq_time'):
      
     for i in range(len(list_hdf5_filename)):
         with h5py.File(str(list_hdf5_path[i]), 'r') as f:
-            dm_t = np.array(f['data_dm_time'])
-            fq_t = np.array(f['data_freq_time']).T
-            dm_time.append(dm_t); fq_time.append(fq_t); ID.append(list_hdf5_filename[i])
+            try:
+                dm_t = np.array(f['and/ml/dm_time'])
+                fq_t = np.array(f['cand/ml/freq_time']).T
+            except KeyError:
+                # Try alternative candidate hdf5 format
+                dm_t = np.array(f['data_dm_time'])
+                fq_t = np.array(f['data_freq_time']).T
+            dm_time.append(dm_t)
+            fq_time.append(fq_t)
+            ID.append(list_hdf5_filename[i])
 
     dm_time_img = np.expand_dims(np.array(dm_time),1)
     fq_time_img = np.expand_dims(np.array(fq_time),1)
 
-    
     if n_images == 'dm_fq_time':
         X_img = np.stack((dm_time_img,fq_time_img),axis=-1)
         X_img = X_img.reshape(X_img.shape[0], 256, 256, 2)
@@ -94,11 +100,11 @@ def FRB_prediction(model_name, X_test, ID, result_dir, probability):
     fit_model  = model_from_json(loaded_model_json)
 
     # load weights into new model
-    fit_model.load_weights("./FRBID_model/"+model_name+".h5")
+    fit_model.load_weights("./FRBID_model/"+model_name+".weights.h5")
     print("Loaded model:"+ model_name +" from disk")
 
     # Overall prediction for the whole sample
-    overall_probability = fit_model.predict_proba(X_test)
+    overall_probability = fit_model.predict(X_test)
 
     # For all the candidate, output the probability that it is a real source
     overall_real_prob = overall_probability[:,1]
@@ -106,5 +112,5 @@ def FRB_prediction(model_name, X_test, ID, result_dir, probability):
     overall_dataframe['probability'] = overall_real_prob
     overall_dataframe['label'] = np.round(overall_real_prob>=probability)
     ensure_dir(result_dir)
-    overall_dataframe.to_csv(result_dir+'results_'+model_name+'.csv',index=None)
+    overall_dataframe.to_csv(result_dir+'/results_'+model_name+'.csv',index=None)
     return overall_real_prob, overall_dataframe

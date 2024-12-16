@@ -56,7 +56,7 @@ def model_prediction(fit_model, odir, model_name, X_test, y_test, classes=["RFI"
         json_file.close()
         fit_model  = model_from_json(loaded_model_json)
         # load weights into new model
-        fit_model.load_weights("./FRBID_model/"+model_name+".h5")
+        fit_model.load_weights("./FRBID_model/"+model_name+".weights.h5")
         print("Loaded model from disk")
 
     else:

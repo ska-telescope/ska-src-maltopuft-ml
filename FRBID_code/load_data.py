@@ -44,21 +44,33 @@ def load_data(csv_files='./data/csv_labels/test_set.csv', data_dir = './data/tes
     ID = []; y = []
     dm_time = [] ; fq_time = []
     
-    list_hdf5_filename = os.listdir(data_dir)
+    list_hdf5_filename = [
+        fname for fname in os.listdir(data_dir)
+        if fname.endswith('.hdf5')
+    ]
     data_csv = pd.read_csv(csv_files)
     
     # Iterate through Number of candidate files in directory
     for i in range(len(list_hdf5_filename)):
         row = data_csv[data_csv.h5.str.match(list_hdf5_filename[i])]
-        if (row.shape[0]!=0):
-            cand_name = row.h5.values[0]
-            label = row.label.values[0]
-            ID.append(cand_name)
-            y.append(label)
-            with h5py.File(data_dir+str(cand_name), 'r') as f:
+
+        if row.shape[0] == 0:
+            msg = f"No label found for {list_hdf5_filename[i]}"
+            raise ValueError(msg)
+
+        cand_name = row.h5.values[0]
+        label = row.label.values[0]
+        ID.append(cand_name)
+        y.append(label)
+        with h5py.File(data_dir+str(cand_name), 'r') as f:
+            try:
+                dm_t = np.array(f['cand/ml/dm_time'])
+                fq_t = np.array(f['cand/ml/freq_time']).T
+            except KeyError:
+                # Try alternative candidate hdf5 format
                 dm_t = np.array(f['data_dm_time'])
                 fq_t = np.array(f['data_freq_time']).T
-                dm_time.append(dm_t); fq_time.append(fq_t)
+            dm_time.append(dm_t); fq_time.append(fq_t)
 
     dm_time_img = np.expand_dims(np.array(dm_time),1)
     fq_time_img = np.expand_dims(np.array(fq_time),1)
