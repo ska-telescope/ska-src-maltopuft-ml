@@ -197,6 +197,7 @@ def plot_images(data, ID, y_true, odir, savefig=False, show=True):
     for j in range(data.shape[0]):
         fig, axs = plt.subplots(1,data.shape[3], figsize=(15, 4), facecolor='w', edgecolor='k')
         fig.subplots_adjust(hspace = .2, wspace=.05)
+        fig.canvas.manager.set_window_title(f"{ID}: {y_true}")
         titles = ['DM-Time','Frequency-Time']    
         axs    = axs.ravel()
 
