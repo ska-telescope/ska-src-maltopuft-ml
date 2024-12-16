@@ -21,9 +21,6 @@ Pipfile.lock
 .env*
 !.env.example
 
-# Local scripts
-dev-entrypoint.sh
-
 # Pytest
 htmlcov
 .coverage
