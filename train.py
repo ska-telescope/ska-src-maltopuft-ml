@@ -71,7 +71,10 @@ X_train_, y_train_ = shuffle_all([X_train, y_train], len(y_train), seed=seed)
 
 # Split the training set into 80% that will be used during training and 20% to be used during validation
 X_train, X_val, y_train, y_val = train_test_split(
-    X_train_, y_train_, test_size=0.2, random_state=42
+    X_train_,
+    y_train_,
+    test_size=0.2,
+    random_state=42,
 )
 
 print("Total number of training instances: {}".format(str(len(y_train))))
