@@ -107,11 +107,11 @@ def model_prediction(
     plot_confusion_matrix(
         conf_mat,
         classes_types=classes,
-        ofname=os.path.join(odir, "confusion_matrix.pdf"),
+        ofname=os.path.join(odir, "confusion_matrix.jpg"),
         normalize=cm_norm,
         show=show,
     )
-    # plot_roc(fpr, tpr, auc, ofname=os.path.join(odir, "ROC.pdf"),show=show)
+    # plot_roc(fpr, tpr, auc, ofname=os.path.join(odir, "ROC.jpg"),show=show)
 
     name_file = open(os.path.join(odir, "Results.txt"), "w")
     name_file.write("=" * 80 + "\n")

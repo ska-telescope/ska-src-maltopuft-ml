@@ -219,8 +219,8 @@ OUTPUTS:
 if training:
     curves_loss_accuracy = optimsation_curve(
         history_,
-        plot_dir1=os.path.join(output_directory, "Accuracy.pdf"),
-        plot_dir2=os.path.join(output_directory, "Loss.pdf"),
+        plot_dir1=os.path.join(output_directory, "Accuracy.jpg"),
+        plot_dir2=os.path.join(output_directory, "Loss.jpg"),
         show=False,
     )
 
