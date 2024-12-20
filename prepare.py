@@ -48,7 +48,7 @@ if __name__ == "__main__":
     labels_df = pd.read_csv(train_labels)
 
     ds = None
-    imgs, labels = [], []
+    imgs, labels, fnames = [], [], []
     for idx, fname in enumerate(train_data.iterdir()):
         if idx % 500 == 0:
             print(f"Processing candidate {idx}")
@@ -57,25 +57,26 @@ if __name__ == "__main__":
 
         imgs.append(load_img(filename=fname))
         labels.append(get_label(df=labels_df, filename=fname))
+        fnames.append(str(fname.stem))
 
         if ds is None:
             ds = tf.data.Dataset.from_tensor_slices(
-                (imgs, to_categorical(labels, nClasses))
+                (imgs, to_categorical(labels, nClasses), fnames)
             )
-            imgs, labels = [], []
+            imgs, labels, fnames = [], [], []
 
         if idx % 100 == 0 and idx > 0:
             ds = ds.concatenate(
                 tf.data.Dataset.from_tensor_slices(
-                    (imgs, to_categorical(labels, nClasses))
+                    (imgs, to_categorical(labels, nClasses), fnames)
                 )
             )
-            imgs, labels = [], []
+            imgs, labels, fnames = [], [], []
 
     if len(imgs) > 0 and len(labels) > 0:
         ds = ds.concatenate(
             tf.data.Dataset.from_tensor_slices(
-                (imgs, to_categorical(labels, nClasses))
+                (imgs, to_categorical(labels, nClasses), fnames)
             )
         )
 

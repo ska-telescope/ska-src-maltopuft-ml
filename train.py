@@ -19,7 +19,7 @@ import numpy as np
 import tensorflow as tf
 
 from FRBID_code.model import compile_model, model_save
-from FRBID_code.plot import optimsation_curve
+from FRBID_code.plot import optimsation_curve, plot_images
 from FRBID_code.evaluation import model_prediction, save_classified_examples
 from FRBID_code.util import makedirs
 
@@ -103,7 +103,6 @@ if training:
         batch_size=batch_size,
         epochs=30,
         lr=0.0002,
-        class_weight=None,
         early_stopping=True,
         save_model=True,
         data_augmentation=False,
@@ -136,9 +135,10 @@ OUTPUTS:
                  candidate is therefore a real candidate with prob 0.9 and has a probability of 0.1 that it is bogus
 """
 
-
-X_test = np.asarray([x for x, y in test_ds])
-y_test = np.asarray([y for x, y in test_ds])
+X_test = np.concatenate([img for img, label, fname in test_ds])
+y_test = np.concatenate([label for img, label, fname in test_ds])
+y_test = np.asarray([np.argmax(y, axis=None, out=None) for y in y_test])
+ID_test = np.concatenate([fname for img, label, fname in test_ds])
 
 (
     ypred,
@@ -177,16 +177,16 @@ if training:
 # ----------------------------------------------------------------------------------------------------------------#
 misclassified_array = misclassified
 y_true = y_test[misclassified_array]
-# ID_misclassified = ID_test[misclassified_array]
+ID_misclassified = ID_test[misclassified_array]
 misclassified_img = X_test[misclassified_array]
-# plot_images(
-#    misclassified_img * 255.0,
-#    ID_misclassified,
-#    y_true,
-#    odir=output_directory + "/misclassified_examples/",
-#    savefig=True,
-#    show=False,
-# )
+plot_images(
+    misclassified_img * 255.0,
+    ID_misclassified,
+    y_true,
+    odir=output_directory + "/misclassified_examples/",
+    savefig=True,
+    show=False,
+)
 
 # ----------------------------------------------------------------------------------------------------------------#
 # # Save probability of correctly classified real and bogus in csv file
@@ -198,7 +198,7 @@ misclassified_img = X_test[misclassified_array]
 ) = save_classified_examples(
     X_test,
     y_test,
-    # ID_test,
+    ID_test,
     correct_classification,
     probability,
     odir_real=output_directory + "/classified_examples/1/",
