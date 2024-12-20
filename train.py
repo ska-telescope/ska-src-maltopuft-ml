@@ -11,27 +11,19 @@ Python implementation for FRBID: Fast Radio Burst Intelligent Distinguisher.
 This code is tested in Python 3 version 3.5.3  
 """
 
-
 import warnings
 
-warnings.filterwarnings("ignore")
 import os
-import numpy as np
-import pandas as pd
-from FRBID_code.load_data import load_data, shuffle_all
-
-import matplotlib.pylab as plt
-from keras.utils import to_categorical
 from time import gmtime, strftime
-from sklearn.model_selection import train_test_split
-
-# from load_data import shuffle_all, load_data
-from FRBID_code.model import compile_model, model_save
-from FRBID_code.plot import optimsation_curve, feature_maps, plot_images
-from FRBID_code.evaluation import model_prediction, save_classified_examples
-from FRBID_code.util import makedirs, ensure_dir
-
+import numpy as np
 import tensorflow as tf
+
+from FRBID_code.model import compile_model, model_save
+from FRBID_code.plot import optimsation_curve
+from FRBID_code.evaluation import model_prediction, save_classified_examples
+from FRBID_code.util import makedirs
+
+warnings.filterwarnings("ignore")
 
 figSize = (12, 8)
 fontSize = 20
@@ -54,71 +46,26 @@ makedirs(output_directory)
 # Parameters to change: csv_files and data_dir
 # ----------------------------------------------------------------------------------------------------------------#
 
-X_train, y_train, ID_train = load_data(
-    csv_files="./data/csv_labels/train_set.csv",
-    data_dir="./data/training_set/",
-    n_images="dm_fq_time",
+img_shape = (256, 256, 2)
+batch_size = 32
+
+dataset = (
+    tf.data.Dataset.load("./data/tf_ds/train_set")
+    .map(lambda img, label, fname: (img, label))
+    .shuffle(1024)
 )
 
-X_test, y_test, ID_test = load_data(
-    csv_files="./data/csv_labels/test_set.csv",
-    data_dir="./data/test_set/",
-    n_images="dm_fq_time",
+train_size = int(0.8 * len(dataset))
+train_ds = (
+    dataset.take(train_size).batch(batch_size).prefetch(tf.data.AUTOTUNE)
 )
+val_ds = dataset.skip(train_size).batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
-# shuffle training data  (potentially twice, via data augmentation as well)
-X_train_, y_train_ = shuffle_all([X_train, y_train], len(y_train), seed=seed)
-
-# Split the training set into 80% that will be used during training and 20% to be used during validation
-X_train, X_val, y_train, y_val = train_test_split(
-    X_train_,
-    y_train_,
-    test_size=0.2,
-    random_state=42,
+test_ds = (
+    tf.data.Dataset.load("./data/tf_ds/test_set")
+    .batch(batch_size)
+    .prefetch(tf.data.AUTOTUNE)
 )
-
-print("Total number of training instances: {}".format(str(len(y_train))))
-print(
-    "Number of training examples in class 0: {}".format(
-        str(len(np.where(y_train == 0)[0]))
-    )
-)
-print(
-    "Number of training examples in class 1: {}".format(
-        str(len(np.where(y_train == 1)[0]))
-    )
-)
-print("Total number of validation instances: {}".format(str(len(y_val))))
-print(
-    "Number of validation examples in class 0: {}".format(
-        str(len(np.where(y_val == 0)[0]))
-    )
-)
-print(
-    "Number of validation examples in class 1: {}".format(
-        str(len(np.where(y_val == 1)[0]))
-    )
-)
-print("Total number of test instances: {}".format(str(len(y_test))))
-print(
-    "Number of test examples in class 0: {}".format(
-        str(len(np.where(y_test == 0)[0]))
-    )
-)
-print(
-    "Number of test examples in class 1: {}".format(
-        str(len(np.where(y_test == 1)[0]))
-    )
-)
-
-
-# Transform the vector of class integers into a one-hot encoded matrix using to_categorical()
-yTrain1h = to_categorical(y_train, nClasses)
-yTest1h = to_categorical(y_test, nClasses)
-yVal1h = to_categorical(y_val, nClasses)
-print("The training set consists of {}".format(X_train.shape))
-print("The testing set consists of {}".format(X_test.shape))
-print("The validation set consists of {}".format(X_val.shape))
 
 # ----------------------------------------------------------------------------------------------------------------#
 # ## Model training
@@ -149,13 +96,11 @@ OUTPUTS:
 if training:
     history_, modelcnn = compile_model(
         params=model_cnn_name,
-        img_shape=(X_train.shape[1], X_train.shape[2], X_train.shape[3]),
+        img_shape=img_shape,
         save_model_dir="./FRBID_model/",
-        X_train=X_train,
-        y_train=yTrain1h,
-        X_val=X_val,
-        yval1h=yVal1h,
-        batch_size=16,
+        train_ds=train_ds,
+        validation_data=val_ds,
+        batch_size=batch_size,
         epochs=30,
         lr=0.0002,
         class_weight=None,
@@ -191,6 +136,9 @@ OUTPUTS:
                  candidate is therefore a real candidate with prob 0.9 and has a probability of 0.1 that it is bogus
 """
 
+
+X_test = np.asarray([x for x, y in test_ds])
+y_test = np.asarray([y for x, y in test_ds])
 
 (
     ypred,
@@ -229,16 +177,16 @@ if training:
 # ----------------------------------------------------------------------------------------------------------------#
 misclassified_array = misclassified
 y_true = y_test[misclassified_array]
-ID_misclassified = ID_test[misclassified_array]
+# ID_misclassified = ID_test[misclassified_array]
 misclassified_img = X_test[misclassified_array]
-plot_images(
-    misclassified_img * 255.0,
-    ID_misclassified,
-    y_true,
-    odir=output_directory + "/misclassified_examples/",
-    savefig=True,
-    show=False,
-)
+# plot_images(
+#    misclassified_img * 255.0,
+#    ID_misclassified,
+#    y_true,
+#    odir=output_directory + "/misclassified_examples/",
+#    savefig=True,
+#    show=False,
+# )
 
 # ----------------------------------------------------------------------------------------------------------------#
 # # Save probability of correctly classified real and bogus in csv file
@@ -250,7 +198,7 @@ plot_images(
 ) = save_classified_examples(
     X_test,
     y_test,
-    ID_test,
+    # ID_test,
     correct_classification,
     probability,
     odir_real=output_directory + "/classified_examples/1/",

@@ -10,24 +10,19 @@ Python implementation for FRBID: Fast Radio Burst Intelligent Distinguisher.
 This code is tested in Python 3 version 3.5.3  
 """
 
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import (
     Dropout,
     Flatten,
-    Convolution2D,
     MaxPooling2D,
     Dense,
-    Activation,
     Conv2D,
 )
 from tensorflow.keras.callbacks import (
     EarlyStopping,
-    ModelCheckpoint,
     TensorBoard,
 )
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
 def get_modelparameters(params, img_shape, lr):
@@ -165,14 +160,11 @@ def compile_model(
     params,
     img_shape,
     save_model_dir,
-    X_train,
-    y_train,
-    X_val,
-    yval1h,
+    train_ds,
+    validation_data,
     batch_size,
     epochs,
     lr,
-    class_weight,
     early_stopping=False,
     save_model=False,
     data_augmentation=False,
@@ -207,7 +199,7 @@ def compile_model(
 
     callbacks = EarlyStopping(
         monitor="val_accuracy",
-        patience=5,
+        patience=8,
         verbose=1,
         mode="max",
         restore_best_weights=True,
@@ -218,54 +210,12 @@ def compile_model(
         print("Not using data augmentation.")
         if early_stopping:
             history = modelCNN.fit(
-                X_train,
-                y_train,
-                batch_size,
-                epochs,
-                validation_data=[X_val, yval1h],
-                class_weight=class_weight,
+                x=train_ds,
+                validation_data=validation_data,
+                batch_size=batch_size,
+                epochs=epochs,
                 verbose=1,
                 callbacks=[callbacks],
-                shuffle=True,
-            )
-        else:
-            history = modelCNN.fit(
-                X_train,
-                y_train,
-                batch_size,
-                epochs,
-                validation_data=[X_val, yval1h],
-                class_weight=class_weight,
-                verbose=1,
-                shuffle=True,
-            )
-
-    else:
-        print("Using real-time data augmentation.")
-        aug = ImageDataGenerator(
-            horizontal_flip=True, vertical_flip=True, fill_mode="nearest"
-        )
-
-        if early_stopping:
-            history = modelCNN.fit_generator(
-                aug.flow(X_train, y_train, batch_size=batch_size),
-                steps_per_epoch=len(X_train) // batch_size,
-                epochs=epochs,
-                validation_data=[X_val, yval1h],
-                class_weight=class_weight,
-                verbose=1,
-                callbacks=[callbacks],
-                shuffle=True,
-            )
-
-        else:
-            history = modelCNN.fit_generator(
-                aug.flow(X_train, y_train, batch_size=batch_size),
-                steps_per_epoch=len(X_train) // batch_size,
-                epochs=epochs,
-                validation_data=[X_val, yval1h],
-                class_weight=class_weight,
-                verbose=1,
                 shuffle=True,
             )
     return history, modelCNN
