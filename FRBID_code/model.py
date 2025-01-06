@@ -198,10 +198,10 @@ def compile_model(
         )
 
     callbacks = EarlyStopping(
-        monitor="val_accuracy",
+        monitor="val_loss",
         patience=8,
         verbose=1,
-        mode="max",
+        mode="min",
         restore_best_weights=True,
     )
     modelCNN = get_modelparameters(params, img_shape, lr)
