@@ -50,7 +50,7 @@ img_shape = (256, 256, 2)
 batch_size = 32
 
 dataset = (
-    tf.data.Dataset.load("./data/tf_ds/train_set")
+    tf.data.Dataset.load("./data/tf_ds/train_set_used_update")
     .map(lambda img, label, fname: (img, label))
     .shuffle(1024)
 )
@@ -62,7 +62,7 @@ train_ds = (
 val_ds = dataset.skip(train_size).batch(batch_size).prefetch(tf.data.AUTOTUNE)
 
 test_ds = (
-    tf.data.Dataset.load("./data/tf_ds/test_set")
+    tf.data.Dataset.load("./data/tf_ds/test_set_used_update")
     .batch(batch_size)
     .prefetch(tf.data.AUTOTUNE)
 )

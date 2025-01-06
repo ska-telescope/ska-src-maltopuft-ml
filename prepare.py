@@ -41,7 +41,11 @@ if __name__ == "__main__":
     data_dir = Path("data")
 
     ds_name = "train"
-    label_name = "train"
+    label_name = "train_set_used_update"
+
+    # ds_name = "test_new"
+    # label_name = "test_set_used_update"
+
     train_data = data_dir / ds_name
     train_labels = data_dir / "csv_labels" / f"{label_name}.csv"
 
@@ -55,8 +59,12 @@ if __name__ == "__main__":
         if fname.suffix != ".hdf5":
             continue
 
+        try:
+            labels.append(get_label(df=labels_df, filename=fname))
+        except ValueError:
+            continue
+
         imgs.append(load_img(filename=fname))
-        labels.append(get_label(df=labels_df, filename=fname))
         fnames.append(str(fname.stem))
 
         if ds is None:
