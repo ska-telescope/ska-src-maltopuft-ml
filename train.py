@@ -58,9 +58,17 @@ makedirs(output_directory)
 # Parameters to change: csv_files and data_dir
 #----------------------------------------------------------------------------------------------------------------#
 
-X_train, y_train, ID_train = load_data(csv_files='./data/csv_labels/train_set.csv', data_dir = './data/training_set/',n_images = 'dm_fq_time')
+X_train, y_train, ID_train = load_data(
+    csv_files="./data/csv_labels/train_set.csv",
+    data_dir="./data/training_set/",
+    n_images="dm_fq_time",
+)
 
-X_test, y_test, ID_test = load_data(csv_files='./data/csv_labels/test_set.csv', data_dir = './data/test_set/',n_images = 'dm_fq_time')
+X_test, y_test, ID_test = load_data(
+    csv_files="./data/csv_labels/test_set.csv",
+    data_dir="./data/test_set/",
+    n_images="dm_fq_time",
+)
 
 # shuffle training data  (potentially twice, via data augmentation as well)
 X_train_, y_train_ = shuffle_all([X_train, y_train], len(y_train), seed=seed)

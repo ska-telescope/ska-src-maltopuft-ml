@@ -3,6 +3,11 @@
 *.eggs
 .ipynb_checkpoints
 
+# Script directories
+data/**
+FRBID_model/
+FRBID_output/
+
 build
 dist
 .cache
