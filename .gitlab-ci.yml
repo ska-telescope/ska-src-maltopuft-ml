@@ -1,0 +1,11 @@
+image: python:3.11-slim
+  
+stages:
+  - dummy-ci
+
+dummy-ci-job:
+  stage: dummy-ci
+  script:
+    - echo "hello world";
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'

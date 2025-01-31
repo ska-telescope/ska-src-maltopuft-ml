@@ -16,13 +16,14 @@ import json
 
 
 def makedirs(d):
-    '''Make a directory if it does not exist'''
+    """Make a directory if it does not exist"""
     if not os.path.exists(d):
         os.makedirs(d)
-            
+
+
 def ensure_dir(f):
-    '''Ensure that the directory exist, if it does not exist, create one automatically'''
-    
+    """Ensure that the directory exist, if it does not exist, create one automatically"""
+
     d = os.path.dirname(f)
     if not os.path.exists(d):
         try:
